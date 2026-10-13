@@ -541,27 +541,48 @@ fig2 = px.bar(
     color_discrete_sequence=CROP_COLORS,
 )
 show_chart(fig2)
+# ---------------------------------------------------------
+# CHART 3: MONTHLY MARKET PRICE TREND
+# ---------------------------------------------------------
+st.subheader("3. Monthly Market Price Trend")
 
-st.subheader("3. Rainfall And Crop Yield")
-
-rainfall_data = filtered_production.dropna(
-    subset=["Annual_Rainfall_mm", "Yield_Tonnes_per_Hectare"]
+monthly_prices = (
+    filtered_market
+    .dropna(subset=["Month", "Modal_Price_Rs_per_Quintal"])
+    .groupby(["Month", "Crop"], as_index=False)
+    ["Modal_Price_Rs_per_Quintal"]
+    .mean()
+    .sort_values("Month")
 )
 
-fig3 = px.scatter(
-    rainfall_data,
-    x="Annual_Rainfall_mm",
-    y="Yield_Tonnes_per_Hectare",
-    color="Crop",
-    title="Annual Rainfall Vs Crop Yield",
-    labels={
-        "Annual_Rainfall_mm": "Annual Rainfall (Mm)",
-        "Yield_Tonnes_per_Hectare": "Yield (Tonnes Per Hectare)",
-    },
-    color_discrete_sequence=CROP_COLORS,
-)
-fig3.update_traces(marker=dict(size=9, opacity=0.8, line=dict(width=0)))
-show_chart(fig3)
+if not monthly_prices.empty:
+    fig3 = px.line(
+        monthly_prices,
+        x="Month",
+        y="Modal_Price_Rs_per_Quintal",
+        color="Crop",
+        markers=True,
+        title="Average Market Price By Month And Crop",
+        labels={
+            "Month": "Month",
+            "Modal_Price_Rs_per_Quintal": "Price (₹ Per Quintal)",
+            "Crop": "Crop",
+        },
+        color_discrete_sequence=CROP_COLORS,
+    )
+
+    fig3.update_xaxes(
+        tickmode="array",
+        tickvals=list(range(1, 13)),
+        ticktext=[
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        ],
+    )
+    show_chart(fig3)
+else:
+    st.info("There is not enough monthly market-price data for this chart.")
+
 
 st.subheader("4. Market Price Comparison By Crop")
 
@@ -647,37 +668,37 @@ fig6.update_traces(
     marker_line_width=0.7,
 )
 show_chart(fig6)
+# ---------------------------------------------------------
+# CHART 7: YIELD BY SEASON AND CROP
+# ---------------------------------------------------------
+st.subheader("7. Yield By Season And Crop")
 
-st.subheader("7. Fertilizer Use By Crop")
-
-fertilizer_summary = (
+season_yield = (
     filtered_production
-    .groupby("Crop", as_index=False)["Fertilizer_NPK_kg_per_Hectare"]
+    .dropna(subset=["Season", "Crop", "Yield_Tonnes_per_Hectare"])
+    .groupby(["Season", "Crop"], as_index=False)
+    ["Yield_Tonnes_per_Hectare"]
     .mean()
-    .dropna()
-    .sort_values("Fertilizer_NPK_kg_per_Hectare", ascending=True)
 )
 
-if not fertilizer_summary.empty:
+if not season_yield.empty:
     fig7 = px.bar(
-        fertilizer_summary,
-        x="Fertilizer_NPK_kg_per_Hectare",
-        y="Crop",
-        orientation="h",
-        title="Average Fertilizer NPK Use By Crop",
+        season_yield,
+        x="Season",
+        y="Yield_Tonnes_per_Hectare",
+        color="Crop",
+        barmode="group",
+        title="Average Crop Yield Across Seasons",
         labels={
+            "Season": "Season",
+            "Yield_Tonnes_per_Hectare": "Yield (Tonnes Per Hectare)",
             "Crop": "Crop",
-            "Fertilizer_NPK_kg_per_Hectare": "Fertilizer (Kg Per Hectare)",
         },
-        color_discrete_sequence=[PALETTE["sage_mid"]],
-    )
-    fig7.update_traces(
-        marker_line_color=PALETTE["green"],
-        marker_line_width=0.7,
+        color_discrete_sequence=CROP_COLORS,
     )
     show_chart(fig7)
 else:
-    st.info("No fertilizer-use data is available for the selected filters.")
+    st.info("There is not enough season and yield data for this chart.")
 
 st.subheader("8. Agricultural Variable Relationship Heatmap")
 
