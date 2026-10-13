@@ -47,5 +47,3 @@ Additional features include interactive filters, KPI cards, data previews, and C
 ## Dataset Privacy
 The Excel workbook is not included in this repository. Users must upload the workbook through the dashboard to view the analysis.
 
-## Project Type
-CA4 Capstone — Business Analytics
