@@ -3,9 +3,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --------------------------------------------------
-# PAGE CONFIGURATION
-# --------------------------------------------------
+# =========================================================
+# 1. PAGE CONFIGURATION
+# =========================================================
 st.set_page_config(
     page_title="Agriculture Analytics Dashboard",
     page_icon="🌾",
@@ -13,18 +13,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --------------------------------------------------
-# PROFESSIONAL GREEN AND WHITE THEME
-# --------------------------------------------------
+# =========================================================
+# 2. PROFESSIONAL WHITE AND GREEN THEME
+# =========================================================
 st.markdown("""
 <style>
 .stApp {
-    background-color: #F6F9F5;
-    color: #26382C;
+    background-color: #F7F9F6;
+    color: #000000;
 }
 
 [data-testid="stHeader"] {
-    background-color: #F6F9F5;
+    background-color: #F7F9F6;
 }
 
 h1, h2, h3, h4 {
@@ -34,19 +34,15 @@ h1, h2, h3, h4 {
 .stApp p,
 .stApp label,
 .stApp [data-testid="stMarkdownContainer"] {
-    color: #34483B;
+    color: #000000;
 }
 
 [data-testid="stSidebar"] {
     background-color: #EAF1E9;
 }
 
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] p {
-    color: #244632 !important;
+[data-testid="stSidebar"] * {
+    color: #000000;
 }
 
 div[data-testid="stMetric"] {
@@ -57,12 +53,9 @@ div[data-testid="stMetric"] {
     box-shadow: 0 2px 8px rgba(32, 91, 59, 0.06);
 }
 
-[data-testid="stMetricLabel"] {
-    color: #53675A !important;
-}
-
+[data-testid="stMetricLabel"],
 [data-testid="stMetricLabel"] p {
-    color: #53675A !important;
+    color: #000000 !important;
 }
 
 [data-testid="stMetricValue"] {
@@ -80,8 +73,8 @@ div[data-testid="stPlotlyChart"] {
 .stDownloadButton button {
     background-color: #246B45;
     color: #FFFFFF !important;
-    border: none;
     border-radius: 8px;
+    border: none;
 }
 
 .stDownloadButton button:hover {
@@ -95,22 +88,19 @@ hr {
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------------------------------------
-# COLOUR PALETTE
-# --------------------------------------------------
+# =========================================================
+# 3. COLOURS AND CHART STYLE
+# =========================================================
+GREEN = "#246B45"
+DARK_GREEN = "#205B3B"
+
 CROP_COLORS = [
     "#246B45", "#E3A72F", "#3977A8", "#C65D45",
     "#7B61A8", "#299D91", "#A66B3D", "#718096",
-    "#D16B9A", "#789C42"
+    "#D16B9A", "#789C42", "#557C9B", "#B07D4F"
 ]
 
-GREEN = "#246B45"
-DARK_GREEN = "#205B3B"
-GOLD = "#D5A02E"
 
-# --------------------------------------------------
-# CHART STYLING FUNCTION
-# --------------------------------------------------
 def style_chart(fig, height=430):
     fig.update_layout(
         template="plotly_white",
@@ -119,23 +109,25 @@ def style_chart(fig, height=430):
         font=dict(
             family="Arial, sans-serif",
             size=13,
-            color="#26382C"
+            color="#000000"
         ),
         title_font=dict(size=19, color=DARK_GREEN),
         title_x=0.02,
         height=height,
         margin=dict(l=25, r=25, t=75, b=45),
         legend=dict(
-            bgcolor="rgba(255,255,255,0.85)",
-            borderwidth=0
+            font=dict(color="#000000"),
+            bgcolor="rgba(255,255,255,0.9)"
         ),
         hoverlabel=dict(
             bgcolor="#FFFFFF",
-            font_color="#26382C"
+            font_color="#000000"
         )
     )
 
     fig.update_xaxes(
+        title_font=dict(color="#000000"),
+        tickfont=dict(color="#000000"),
         showgrid=True,
         gridcolor="#E8EEE8",
         zerolinecolor="#D5DFD5",
@@ -143,6 +135,8 @@ def style_chart(fig, height=430):
     )
 
     fig.update_yaxes(
+        title_font=dict(color="#000000"),
+        tickfont=dict(color="#000000"),
         showgrid=True,
         gridcolor="#E8EEE8",
         zerolinecolor="#D5DFD5",
@@ -151,66 +145,72 @@ def style_chart(fig, height=430):
 
     return fig
 
-# --------------------------------------------------
-# TITLE
-# --------------------------------------------------
+
+# =========================================================
+# 4. TITLE AND INTRODUCTION
+# =========================================================
 st.title("🌾 Agriculture Crop Marketplace Dashboard")
+
 st.markdown(
-    "Explore crop production, agricultural productivity, "
-    "rainfall, fertilizer usage and market price patterns."
+    "An interactive business analytics dashboard exploring "
+    "crop productivity, regional performance, market prices, "
+    "rainfall and fertilizer usage."
 )
 
-# --------------------------------------------------
-# EXCEL WORKBOOK UPLOAD
-# --------------------------------------------------
+# =========================================================
+# 5. EXCEL UPLOAD
+# =========================================================
 @st.cache_data
 def load_data(file_bytes):
     from io import BytesIO
+
     return pd.read_excel(
         BytesIO(file_bytes),
         sheet_name="Agriculture Data"
     )
 
+
 uploaded = st.file_uploader(
-    "Upload your agriculture Excel workbook (.xlsx)",
+    "Upload your agriculture Excel workbook",
     type=["xlsx"]
 )
 
 if uploaded is None:
     st.info(
-        "Please upload your agriculture Excel workbook to view "
-        "the dashboard and its charts."
+        "Upload your Excel workbook to view the dashboard. "
+        "The workbook is not stored in this GitHub repository."
     )
 
     st.markdown("""
     ### Dashboard features
+
     - Crop yield trends over time
     - Top 15 regions by average yield
     - Rainfall versus crop yield
-    - Monthly market price trends
-    - Price variability across crops
+    - Market price variability by crop
     - Production versus market price
     - Crop productivity comparison
-    - Fertilizer usage versus yield
-
-    Your workbook is not included in the GitHub repository.
-    Upload it here when you want to analyse your data.
+    - Fertilizer use versus yield
+    - Business insights based on your filters
     """)
+
     st.stop()
 
 try:
     df = load_data(uploaded.getvalue()).copy()
+
 except Exception as error:
     st.error(
-        "Unable to read the workbook. Please check that it is a "
-        "valid Excel file with a sheet named 'Agriculture Data'."
+        "Unable to read the workbook. Make sure it is a valid "
+        "Excel file with a sheet named 'Agriculture Data'."
     )
     st.exception(error)
     st.stop()
 
-# --------------------------------------------------
-# CHECK REQUIRED COLUMNS
-# --------------------------------------------------
+
+# =========================================================
+# 6. VALIDATE AND CLEAN DATA
+# =========================================================
 required_columns = [
     "State",
     "District",
@@ -227,20 +227,18 @@ required_columns = [
 ]
 
 missing_columns = [
-    col for col in required_columns if col not in df.columns
+    column for column in required_columns
+    if column not in df.columns
 ]
 
 if missing_columns:
     st.error(
-        "These required columns are missing from the workbook: "
+        "The workbook is missing these required columns: "
         + ", ".join(missing_columns)
     )
-    st.write("Available columns:", df.columns.tolist())
+    st.write("Columns found in workbook:", df.columns.tolist())
     st.stop()
 
-# --------------------------------------------------
-# DATA CLEANING
-# --------------------------------------------------
 numeric_columns = [
     "Year",
     "Month",
@@ -251,28 +249,28 @@ numeric_columns = [
     "Modal_Price_Rs_per_Quintal"
 ]
 
-for col in numeric_columns:
-    df[col] = pd.to_numeric(df[col], errors="coerce")
+for column in numeric_columns:
+    df[column] = pd.to_numeric(df[column], errors="coerce")
 
-for col in ["State", "District", "Crop", "Season", "Market"]:
-    df[col] = df[col].astype("string").str.strip()
+for column in ["State", "District", "Crop", "Season", "Market"]:
+    df[column] = df[column].astype("string").str.strip()
 
-# Production is repeated across market/month records.
-# Remove those repeats for production-focused analysis.
+# Production data can repeat across months and markets.
 production_df = df.drop_duplicates(
     subset=["State", "District", "Crop", "Year", "Season"]
 ).copy()
 
-# Keep separate market records for price analysis.
+# Preserve distinct market/month records for price analysis.
 market_df = df.drop_duplicates(
     subset=["State", "District", "Crop", "Year", "Month", "Market"]
 ).copy()
 
-# --------------------------------------------------
-# SIDEBAR FILTERS
-# --------------------------------------------------
+
+# =========================================================
+# 7. SIDEBAR FILTERS
+# =========================================================
 st.sidebar.title("Dashboard Filters")
-st.sidebar.caption("Choose the data you want to explore.")
+st.sidebar.caption("Change the selections to explore your data.")
 
 states = sorted(production_df["State"].dropna().unique().tolist())
 crops = sorted(production_df["Crop"].dropna().unique().tolist())
@@ -314,16 +312,18 @@ available_years = sorted(
 
 if available_years:
     if len(available_years) > 1:
-        selected_years = st.sidebar.slider(
+        year_range = st.sidebar.slider(
             "Year range",
             min_value=min(available_years),
             max_value=max(available_years),
             value=(min(available_years), max(available_years))
         )
-        year_min, year_max = selected_years
+
+        year_min, year_max = year_range
+
     else:
         year_min = year_max = available_years[0]
-        st.sidebar.caption(f"Year: {year_min}")
+        st.sidebar.caption(f"Selected year: {year_min}")
 
     filtered_production = filtered_production[
         filtered_production["Year"].between(year_min, year_max)
@@ -335,17 +335,18 @@ if available_years:
 
 if filtered_production.empty:
     st.warning(
-        "No production records match these filters. "
-        "Please select different states, crops, seasons or years."
+        "No records match your filters. Change the state, crop, "
+        "season or year selection."
     )
     st.stop()
 
-# --------------------------------------------------
-# KPI CARDS
-# --------------------------------------------------
+
+# =========================================================
+# 8. KEY PERFORMANCE INDICATORS
+# =========================================================
 st.subheader("Agriculture at a Glance")
 
-avg_yield = filtered_production[
+average_yield = filtered_production[
     "Yield_Tonnes_per_Hectare"
 ].mean()
 
@@ -372,20 +373,22 @@ k3.metric(
 
 k4.metric(
     "Average yield",
-    f"{avg_yield:,.2f} t/ha" if pd.notna(avg_yield) else "N/A"
+    f"{average_yield:,.2f} t/ha"
+    if pd.notna(average_yield) else "N/A"
 )
 
 if pd.notna(total_production):
     st.caption(
-        f"Total production across filtered production records: "
+        f"Sum of production across filtered records: "
         f"{total_production:,.0f} tonnes"
     )
 
 st.divider()
 
-# --------------------------------------------------
-# CHART 1: CROP YIELD TREND OVER YEARS
-# --------------------------------------------------
+
+# =========================================================
+# CHART 1: CROP YIELD TREND
+# =========================================================
 st.subheader("1. Crop Yield Trend Over Years")
 
 yield_trend = filtered_production.dropna(
@@ -407,14 +410,17 @@ if not yield_trend.empty:
         },
         color_discrete_sequence=[GREEN]
     )
+
     fig.update_traces(line=dict(width=3), marker=dict(size=8))
     st.plotly_chart(style_chart(fig), use_container_width=True)
+
 else:
     st.info("No yield data is available for this chart.")
 
-# --------------------------------------------------
+
+# =========================================================
 # CHART 2: TOP 15 REGIONS BY YIELD
-# --------------------------------------------------
+# =========================================================
 st.subheader("2. Top 15 Regions by Yield")
 
 region_yield = filtered_production.dropna(
@@ -433,7 +439,7 @@ region_yield["Region"] = (
 
 top_regions = region_yield.nlargest(
     15, "Average_Yield"
-).sort_values("Average_Yield", ascending=True)
+).sort_values("Average_Yield")
 
 if not top_regions.empty:
     fig = px.bar(
@@ -449,18 +455,28 @@ if not top_regions.empty:
         color="Average_Yield",
         color_continuous_scale=["#B9D9C2", GREEN]
     )
+
     fig.update_layout(coloraxis_showscale=False)
-    st.plotly_chart(style_chart(fig, 520), use_container_width=True)
+    st.plotly_chart(
+        style_chart(fig, 520),
+        use_container_width=True
+    )
+
 else:
     st.info("No regional yield data is available.")
 
-# --------------------------------------------------
-# CHART 3: RAINFALL VS YIELD
-# --------------------------------------------------
+
+# =========================================================
+# CHART 3: RAINFALL VERSUS YIELD
+# =========================================================
 st.subheader("3. Rainfall vs Yield")
 
 rainfall_data = filtered_production.dropna(
-    subset=["Annual_Rainfall_mm", "Yield_Tonnes_per_Hectare", "Crop"]
+    subset=[
+        "Annual_Rainfall_mm",
+        "Yield_Tonnes_per_Hectare",
+        "Crop"
+    ]
 )
 
 if not rainfall_data.empty:
@@ -478,72 +494,27 @@ if not rainfall_data.empty:
         },
         opacity=0.8
     )
+
     fig.update_traces(marker=dict(size=9))
     st.plotly_chart(style_chart(fig), use_container_width=True)
+
 else:
     st.info("No rainfall and yield data is available.")
 
-# --------------------------------------------------
-# CHART 4: MONTHLY MARKET PRICE TREND
-# --------------------------------------------------
-st.subheader("4. Monthly Market Price Trend")
+
+# =========================================================
+# CHART 4: PRICE VARIABILITY BY CROP
+# Monthly price trend has been removed.
+# =========================================================
+st.subheader("4. Price Variability by Crop")
 
 price_data = filtered_market.dropna(
-    subset=["Year", "Month", "Modal_Price_Rs_per_Quintal", "Crop"]
-).copy()
-
-price_data = price_data[
-    price_data["Month"].between(1, 12)
-    & price_data["Year"].between(1900, 2200)
-]
-
-if not price_data.empty:
-    price_data["Date"] = pd.to_datetime(
-        {
-            "year": price_data["Year"].astype(int),
-            "month": price_data["Month"].astype(int),
-            "day": 1
-        },
-        errors="coerce"
-    )
-
-    monthly_prices = price_data.dropna(
-        subset=["Date"]
-    ).groupby(
-        ["Date", "Crop"], as_index=False
-    ).agg(
-        Average_Price=("Modal_Price_Rs_per_Quintal", "mean")
-    )
-
-    fig = px.line(
-        monthly_prices,
-        x="Date",
-        y="Average_Price",
-        color="Crop",
-        color_discrete_sequence=CROP_COLORS,
-        title="Monthly Average Market Price by Crop",
-        labels={
-            "Date": "Month",
-            "Average_Price": "Average price (₹/quintal)"
-        }
-    )
-    fig.update_traces(line=dict(width=2.5))
-    st.plotly_chart(style_chart(fig, 470), use_container_width=True)
-else:
-    st.info("No valid monthly market price data is available.")
-
-# --------------------------------------------------
-# CHART 5: PRICE VARIABILITY BY CROP
-# --------------------------------------------------
-st.subheader("5. Price Variability by Crop")
-
-box_data = filtered_market.dropna(
     subset=["Crop", "Modal_Price_Rs_per_Quintal"]
 )
 
-if not box_data.empty:
+if not price_data.empty:
     fig = px.box(
-        box_data,
+        price_data,
         x="Crop",
         y="Modal_Price_Rs_per_Quintal",
         color="Crop",
@@ -555,16 +526,22 @@ if not box_data.empty:
         },
         points=False
     )
+
     fig.update_layout(showlegend=False)
     fig.update_xaxes(tickangle=-30)
-    st.plotly_chart(style_chart(fig, 480), use_container_width=True)
+    st.plotly_chart(
+        style_chart(fig, 480),
+        use_container_width=True
+    )
+
 else:
     st.info("No market price data is available.")
 
-# --------------------------------------------------
-# CHART 6: PRODUCTION VS MARKET PRICE
-# --------------------------------------------------
-st.subheader("6. Production vs Market Price")
+
+# =========================================================
+# CHART 5: PRODUCTION VERSUS MARKET PRICE
+# =========================================================
+st.subheader("5. Production vs Market Price")
 
 comparison_data = filtered_market.dropna(
     subset=[
@@ -588,22 +565,25 @@ if not comparison_data.empty:
         color="Crop",
         color_discrete_sequence=CROP_COLORS,
         hover_data=["Year"],
-        title="Crop Production Compared with Average Market Price",
+        title="Crop Production Compared with Market Price",
         labels={
             "Production_Tonnes": "Production (tonnes)",
             "Average_Price": "Average price (₹/quintal)"
         },
         opacity=0.85
     )
+
     fig.update_traces(marker=dict(size=11))
     st.plotly_chart(style_chart(fig), use_container_width=True)
+
 else:
     st.info("No matching production and price data is available.")
 
-# --------------------------------------------------
-# CHART 7: CROP PRODUCTIVITY COMPARISON
-# --------------------------------------------------
-st.subheader("7. Crop Productivity Comparison")
+
+# =========================================================
+# CHART 6: CROP PRODUCTIVITY
+# =========================================================
+st.subheader("6. Crop Productivity Comparison")
 
 crop_productivity = filtered_production.dropna(
     subset=["Crop", "Yield_Tonnes_per_Hectare"]
@@ -611,7 +591,7 @@ crop_productivity = filtered_production.dropna(
     "Crop", as_index=False
 ).agg(
     Average_Yield=("Yield_Tonnes_per_Hectare", "mean")
-).sort_values("Average_Yield", ascending=True)
+).sort_values("Average_Yield")
 
 if not crop_productivity.empty:
     fig = px.bar(
@@ -627,15 +607,21 @@ if not crop_productivity.empty:
         color="Average_Yield",
         color_continuous_scale=["#B9D9C2", GREEN]
     )
+
     fig.update_layout(coloraxis_showscale=False)
-    st.plotly_chart(style_chart(fig, 450), use_container_width=True)
+    st.plotly_chart(
+        style_chart(fig, 450),
+        use_container_width=True
+    )
+
 else:
     st.info("No crop productivity data is available.")
 
-# --------------------------------------------------
-# CHART 8: FERTILIZER USE VS YIELD
-# --------------------------------------------------
-st.subheader("8. Fertilizer Use vs Yield")
+
+# =========================================================
+# CHART 7: FERTILIZER USE VERSUS YIELD
+# =========================================================
+st.subheader("7. Fertilizer Use vs Yield")
 
 fertilizer_data = filtered_production.dropna(
     subset=[
@@ -674,27 +660,209 @@ if (
         ],
         title="Average Yield Across Fertilizer Usage Ranges",
         labels={
-            "x": "Fertilizer usage range (kg/hectare)",
+            "x": "Fertilizer range (kg/hectare)",
             "y": "Season",
             "color": "Average yield"
         }
     )
 
-    st.plotly_chart(style_chart(fig, 400), use_container_width=True)
-else:
-    st.info(
-        "There is not enough variation in fertilizer data to build "
-        "the heatmap for the selected filters."
+    st.plotly_chart(
+        style_chart(fig, 400),
+        use_container_width=True
     )
 
-# --------------------------------------------------
-# FILTERED DATA TABLE AND DOWNLOAD
-# --------------------------------------------------
+else:
+    st.info(
+        "There is not enough variation in fertilizer data to "
+        "create a heatmap for the selected filters."
+    )
+
+
+# =========================================================
+# 9. BUSINESS INSIGHTS
+# =========================================================
+st.divider()
+st.header("📊 Business Insights")
+
+st.caption(
+    "Insights are recalculated from the currently selected "
+    "states, crops, seasons and years."
+)
+
+# Crop productivity ranking
+crop_insight = filtered_production.dropna(
+    subset=["Crop", "Yield_Tonnes_per_Hectare"]
+).groupby("Crop")["Yield_Tonnes_per_Hectare"].mean().sort_values(
+    ascending=False
+)
+
+# District productivity ranking
+region_insight = filtered_production.dropna(
+    subset=["State", "District", "Yield_Tonnes_per_Hectare"]
+).groupby(
+    ["State", "District"]
+)["Yield_Tonnes_per_Hectare"].mean().sort_values(
+    ascending=False
+)
+
+# Average modal price by crop
+price_insight = filtered_market.dropna(
+    subset=["Crop", "Modal_Price_Rs_per_Quintal"]
+).groupby("Crop")["Modal_Price_Rs_per_Quintal"].mean().sort_values(
+    ascending=False
+)
+
+# KPI insight cards
+i1, i2, i3 = st.columns(3)
+
+if not crop_insight.empty:
+    i1.metric(
+        "Highest-yielding crop",
+        str(crop_insight.index[0]),
+        f"{crop_insight.iloc[0]:.2f} tonnes/ha"
+    )
+else:
+    i1.metric("Highest-yielding crop", "N/A")
+
+if not region_insight.empty:
+    best_region = region_insight.index[0]
+
+    i2.metric(
+        "Highest-yielding district",
+        str(best_region[1]),
+        str(best_region[0])
+    )
+else:
+    i2.metric("Highest-yielding district", "N/A")
+
+if not price_insight.empty:
+    i3.metric(
+        "Highest average-price crop",
+        str(price_insight.index[0]),
+        f"₹{price_insight.iloc[0]:,.0f}/quintal"
+    )
+else:
+    i3.metric("Highest average-price crop", "N/A")
+
+st.subheader("Key Findings")
+
+# Insight 1: Highest productivity
+if not crop_insight.empty:
+    st.markdown(
+        f"**1. Crop productivity:** "
+        f"{crop_insight.index[0]} has the highest average yield "
+        f"among the selected crops, at "
+        f"{crop_insight.iloc[0]:.2f} tonnes per hectare. "
+        "Its cultivation practices may be worth investigating "
+        "for potential productivity lessons."
+    )
+
+# Insight 2: Lowest productivity
+if len(crop_insight) >= 2:
+    st.markdown(
+        f"**2. Improvement opportunity:** "
+        f"{crop_insight.index[-1]} has the lowest average yield "
+        f"among the selected crops, at "
+        f"{crop_insight.iloc[-1]:.2f} tonnes per hectare. "
+        "Review growing conditions, input use and production "
+        "costs before choosing an intervention."
+    )
+
+# Insight 3: Regional benchmarking
+if not region_insight.empty:
+    best_region = region_insight.index[0]
+
+    st.markdown(
+        f"**3. Regional benchmarking:** "
+        f"{best_region[1]}, {best_region[0]}, has the highest "
+        "average yield among the selected districts. "
+        "Compare its growing conditions and farming practices "
+        "with lower-yielding districts."
+    )
+
+# Insight 4: Market prices
+if not price_insight.empty:
+    st.markdown(
+        f"**4. Market positioning:** "
+        f"{price_insight.index[0]} has the highest average modal "
+        f"price in the selected data, at "
+        f"₹{price_insight.iloc[0]:,.2f} per quintal. "
+        "A higher selling price alone does not mean a higher profit."
+    )
+
+# Insight 5: Rainfall and yield association
+rainfall_insight = filtered_production.dropna(
+    subset=["Annual_Rainfall_mm", "Yield_Tonnes_per_Hectare"]
+)
+
+if len(rainfall_insight) >= 3:
+    rainfall_corr = rainfall_insight[
+        "Annual_Rainfall_mm"
+    ].corr(
+        rainfall_insight["Yield_Tonnes_per_Hectare"]
+    )
+
+    if pd.notna(rainfall_corr):
+        if rainfall_corr >= 0.3:
+            rainfall_message = "a positive linear association"
+        elif rainfall_corr <= -0.3:
+            rainfall_message = "a negative linear association"
+        else:
+            rainfall_message = "a weak linear association"
+
+        st.markdown(
+            f"**5. Rainfall and yield:** The correlation is "
+            f"{rainfall_corr:.2f}, indicating {rainfall_message} "
+            "in the selected data. Correlation does not prove "
+            "that rainfall caused the observed yield pattern."
+        )
+
+# Insight 6: Fertilizer and yield association
+fertilizer_insight = filtered_production.dropna(
+    subset=[
+        "Fertilizer_NPK_kg_per_Hectare",
+        "Yield_Tonnes_per_Hectare"
+    ]
+)
+
+if (
+    len(fertilizer_insight) >= 3
+    and fertilizer_insight[
+        "Fertilizer_NPK_kg_per_Hectare"
+    ].nunique() > 1
+):
+    fertilizer_corr = fertilizer_insight[
+        "Fertilizer_NPK_kg_per_Hectare"
+    ].corr(
+        fertilizer_insight["Yield_Tonnes_per_Hectare"]
+    )
+
+    if pd.notna(fertilizer_corr):
+        st.markdown(
+            f"**6. Fertilizer and yield:** The correlation is "
+            f"{fertilizer_corr:.2f}. Treat this as an initial "
+            "association for further analysis, not evidence that "
+            "increasing fertilizer use will necessarily improve yield."
+        )
+
+# Business limitations
+st.info(
+    "Business recommendation: use these findings to identify "
+    "areas for further investigation. To determine crop profitability, "
+    "additional information on cultivation costs, selling quantities, "
+    "revenue and other relevant factors is required."
+)
+
+
+# =========================================================
+# 10. FILTERED DATA AND CSV DOWNLOAD
+# =========================================================
 st.divider()
 st.subheader("Filtered Agriculture Data")
 
 st.caption(
-    f"Showing up to 500 of {len(filtered_market):,} filtered market records."
+    f"Showing up to 500 of {len(filtered_market):,} filtered "
+    "market records."
 )
 
 st.dataframe(
