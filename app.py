@@ -339,13 +339,15 @@ market_df = df.drop_duplicates(
 st.sidebar.title("Dashboard Filters")
 
 state_options = ["All"] + sorted(df["State"].dropna().unique().tolist())
-crop_options = ["All"] + sorted(df["Crop"].dropna().unique().tolist())
-season_options = ["All"] + sorted(df["Season"].dropna().unique().tolist())
+crop_options = sorted(df["Crop"].dropna().unique().tolist())
+season_options = sorted(df["Season"].dropna().unique().tolist())
 year_options = sorted(df["Year"].dropna().unique().astype(int).tolist())
 
 selected_state = st.sidebar.selectbox("State", state_options, index=0)
-selected_crop = st.sidebar.selectbox("Crop", crop_options, index=0)
-selected_season = st.sidebar.selectbox("Season", season_options, index=0)
+# Updated to multiselect
+selected_crops = st.sidebar.multiselect("Crop", options=crop_options, default=crop_options)
+# Updated to multiselect
+selected_seasons = st.sidebar.multiselect("Season", options=season_options, default=season_options)
 selected_years = st.sidebar.multiselect(
     "Year",
     options=year_options,
@@ -359,11 +361,13 @@ def apply_filters(data):
     if selected_state != "All":
         result = result[result["State"] == selected_state]
 
-    if selected_crop != "All":
-        result = result[result["Crop"] == selected_crop]
+    # Updated logic for multiselect: filter only if list is not empty
+    if selected_crops:
+        result = result[result["Crop"].isin(selected_crops)]
 
-    if selected_season != "All":
-        result = result[result["Season"] == selected_season]
+    # Updated logic for multiselect: filter only if list is not empty
+    if selected_seasons:
+        result = result[result["Season"].isin(selected_seasons)]
 
     return result[result["Year"].isin(selected_years)]
 
